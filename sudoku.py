@@ -1,5 +1,6 @@
 import argparse
-from tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM
+import time
+from tkinter import BitmapImage, Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM
 from typing import Mapping
 
 BOARDS = ['debug', 'n00b', 'l33t', 'error'] # available sudoku boards
@@ -136,8 +137,10 @@ class SudokuUI(Frame):
         self.pack(fill=BOTH, expand=1)
         self.canvas = Canvas(self, width=WIDTH, height=HEIGHT)
         self.canvas.pack(fill=BOTH, side=TOP)
-        self.clear_button = Button(self, text="Clear answers", highlightbackground='#3E4149', command=self.__clear_answers)
-        self.clear_button.pack(fill=BOTH, side=BOTTOM)
+        clear_button = Button(self, text="Clear answers", highlightbackground='#3E4149', command=self.__clear_answers)
+        clear_button.pack(fill=BOTH, side=TOP)
+        solve_button = Button(self, text="Solve", highlightbackground='#3E4149', command=self.__solve)
+        solve_button.pack(fill=BOTH, side=BOTTOM)
 
         self.__draw_grid()
         self.__draw_puzzle()
@@ -183,6 +186,26 @@ class SudokuUI(Frame):
         self.game.start()
         self.canvas.delete("victory")
         self.__draw_puzzle()
+
+    # uses backtracking to solve the puzzle from a given position
+    def __solve(self):
+        self.__draw_puzzle
+        find = self.__find_empty()
+        if not find:
+            return True
+        else:
+            row, col = find
+
+        for i in range(1, 10):
+            if self.__valid(i, (row, col)):
+                self.game.puzzle[row][col] = i
+                self.__draw_puzzle()
+                if self.__solve():
+                    return True
+
+                self.game.puzzle[row][col] = 0
+
+        return False
 
     def __cell_clicked(self, event):
         if self.game.game_over:
@@ -243,6 +266,33 @@ class SudokuUI(Frame):
             fill="white", font=("Arial", 32)
         )
 
+    def __find_empty(self):
+        for i in range(9):
+            for j in range(9):
+                if self.game.puzzle[i][j] == 0:
+                    return (i, j)
+
+        return None
+
+    def __valid(self, num, pos):
+        for i in range(9):
+            if self.game.puzzle[pos[0]][i] == num and pos[1] != i:
+                return False
+
+        for i in range(9):
+            if self.game.puzzle[i][pos[1]] == num and pos[0] != i:
+                return False
+
+        box_x = pos[1] // 3
+        box_y = pos[0] // 3
+
+        for i in range(box_y*3, box_y*3+3):
+            for j in range(box_x*3, box_x*3+3):
+                if self.game.puzzle[i][j] == num and (i, j) != pos:
+                    return False
+
+        return True
+
 def parse_arguments():
     """
     Parses arguments of the form:
@@ -268,5 +318,5 @@ if __name__ == '__main__':
 
         root = Tk()
         SudokuUI(root, game)
-        root.geometry("%dx%d" % (WIDTH, HEIGHT+40))
+        root.geometry("%dx%d" % (WIDTH, HEIGHT+60))
         root.mainloop()
