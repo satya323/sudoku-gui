@@ -136,8 +136,8 @@ class SudokuUI(Frame):
         self.pack(fill=BOTH, expand=1)
         self.canvas = Canvas(self, width=WIDTH, height=HEIGHT)
         self.canvas.pack(fill=BOTH, side=TOP)
-        clear_button = Button(self, text="Clear answers", command=self.__clear_answers)
-        clear_button.pack(fill=BOTH, side=BOTTOM)
+        self.clear_button = Button(self, text="Clear answers", highlightbackground='#3E4149', command=self.__clear_answers)
+        self.clear_button.pack(fill=BOTH, side=BOTTOM)
 
         self.__draw_grid()
         self.__draw_puzzle()
@@ -199,6 +199,8 @@ class SudokuUI(Frame):
                 self.row, self.col = -1, -1
             elif self.game.puzzle[row][col] == 0:
                 self.row, self.col = row, col
+        else:
+            self.row, self.col = -1, -1
         
         self.__draw_cursor()
 
@@ -207,7 +209,7 @@ class SudokuUI(Frame):
         if self.row >= 0 and self.col >= 0:
             x0 = MARGIN + self.col*SIDE+1
             y0 = MARGIN + self.row*SIDE+1
-            x1 = MARGIN + (self.row+1)*SIDE-1
+            x1 = MARGIN + (self.col+1)*SIDE-1
             y1 = MARGIN + (self.row+1)*SIDE-1
             self.canvas.create_rectangle(
                 x0, y0, x1, y1,
